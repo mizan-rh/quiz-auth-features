@@ -49,6 +49,10 @@
    ```bash
    npx prisma studio
    ```
+6. **Download any shadcn component 
+   ```bash
+   npx shadcn add card
+   ```
 
 > You can copy `.env.example` to `.env.local` and fill in your credentials:
 > ```env
