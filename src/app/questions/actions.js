@@ -41,6 +41,25 @@ export async function getQuestions(filter = {}) {
   }
 }
 
+/** Fetch single question by ID
+ */ 
+
+export async function getQuestionById(id) {
+  try {
+    return await db.question.findUnique({
+      where: { id },
+      include: {
+        group: { select: { id: true, name: true } },
+        choices: true,
+      },
+    });
+  } catch (err) {
+    console.error("getQuestionById error:", err);
+    throw new Error("Failed to fetch question");
+  }
+}
+
+
 /**
  * Create question
  */

@@ -14,7 +14,14 @@ export default function QuestionForm({ mode, groups, questionData }) {
   const [score, setScore] = useState("10");
   const [questionGroup, setQuestionGroup] = useState("");
   const [questionText, setQuestionText] = useState("");
-  const [choices, setChoices] = useState([]);
+  
+  // Initialize choices with default values for create mode
+  const [choices, setChoices] = useState([
+    { id: 0, text: "Choice A", selected: true },
+    { id: 1, text: "Choice B", selected: false },
+    { id: 2, text: "Choice C", selected: false },
+    { id: 3, text: "Choice D", selected: false },
+  ]);
 
   // Only update state when questionData changes (edit mode)
   useEffect(() => {
@@ -23,22 +30,33 @@ export default function QuestionForm({ mode, groups, questionData }) {
       setScore(questionData.score?.toString() || "10");
       setQuestionGroup(questionData.groupId || "");
       setQuestionText(questionData.text || "");
-      setChoices(
-        questionData.type === "MCQ" && questionData.choices?.length
-          ? questionData.choices.map(c => ({
-              id: c.index,
-              text: c.text,
-              selected: c.index === questionData.correct
-            }))
-          : [
-              { id: 0, text: "Choice A", selected: true },
-              { id: 1, text: "Choice B", selected: false },
-              { id: 2, text: "Choice C", selected: false },
-              { id: 3, text: "Choice D", selected: false },
-            ]
-      );
+      
+      if (questionData.type === "MCQ" && questionData.choices?.length) {
+        setChoices(
+          questionData.choices.map(c => ({
+            id: c.index,
+            text: c.text,
+            selected: c.index === questionData.correct
+          }))
+        );
+      }
     }
   }, [mode, questionData]);
+
+  // Handle question type change - reset choices when switching to MCQ
+  const handleQuestionTypeChange = (newType) => {
+    setQuestionType(newType);
+    
+    if (newType === "MCQ" && mode !== "edit") {
+      // Reset to default choices when switching to MCQ in create mode
+      setChoices([
+        { id: 0, text: "Choice A", selected: true },
+        { id: 1, text: "Choice B", selected: false },
+        { id: 2, text: "Choice C", selected: false },
+        { id: 3, text: "Choice D", selected: false },
+      ]);
+    }
+  };
 
   const handleChoiceChange = (id, text) => {
     setChoices(choices.map(c => (c.id === id ? { ...c, text } : c)));
@@ -81,7 +99,7 @@ export default function QuestionForm({ mode, groups, questionData }) {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
           <Label>Type</Label>
-          <Select value={questionType} onValueChange={setQuestionType}>
+          <Select value={questionType} onValueChange={handleQuestionTypeChange}>
             <SelectTrigger>
               <SelectValue />
             </SelectTrigger>
@@ -134,7 +152,7 @@ export default function QuestionForm({ mode, groups, questionData }) {
 
       <div className="flex gap-3 pt-4">
         <Button type="submit">{mode === "edit" ? "Update" : "Create"}</Button>
-        <Button variant="outline" onClick={() => window.history.back()}>Cancel</Button>
+        <Button variant="outline" type="button" onClick={() => window.history.back()}>Cancel</Button>
       </div>
     </form>
   );
