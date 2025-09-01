@@ -11,8 +11,8 @@ export default auth((req) => {
   const isLoggedIn = !!req.auth;
   const role = req.auth?.user?.role;
 
-  console.log("🟢 Middleware Debug -> Full Auth:", req.auth);
-  console.log("🟢 Middleware Debug -> User Role:", role);
+  console.log("Middleware Debug -> Full Auth:", req.auth);
+  console.log("Middleware Debug -> User Role:", role);
 
   const isApiAuthRoute = nextUrl.pathname.startsWith(apiAuthPrefix);
   const isPublicRoute = publicRoutes.includes(nextUrl.pathname);
@@ -42,10 +42,10 @@ export default auth((req) => {
     );
   }
 
-  // ✅ RBAC check
+  // RBAC check
   if (nextUrl.pathname.startsWith("/questions")) {
     if (role !== "ADMIN") {
-      console.log("🔴 Access denied for role:", role);
+      console.log("Access denied for role:", role);
       return Response.redirect(new URL("/auth/unauthorized", nextUrl));
     }
   }

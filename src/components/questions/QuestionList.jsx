@@ -4,7 +4,6 @@ import { deleteQuestion } from "@/app/questions/actions";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -13,6 +12,14 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { CheckCircle, Edit, HelpCircle, Plus, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
@@ -57,7 +64,7 @@ export default function QuestionList({ questions, groups }) {
 
   return (
     <div className="min-h-screen bg-background p-6">
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="flex flex-col lg:flex-row justify-between items-start mb-8 gap-4">
           <div>
@@ -98,89 +105,136 @@ export default function QuestionList({ questions, groups }) {
           </Select>
         </div>
 
-        {/* Questions Grid */}
+        {/* Questions Table */}
         {filteredQuestions.length === 0 ? (
-          <p className="text-center text-muted-foreground mt-12">No questions found.</p>
+          <div className="text-center py-16 bg-white rounded-xl border border-gray-100 shadow-sm">
+            <div className="max-w-sm mx-auto">
+              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <HelpCircle className="w-8 h-8 text-gray-400" />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">No questions found</h3>
+              <p className="text-gray-500 mb-6">Create your first question to get started</p>
+              <Button 
+                className="bg-black hover:bg-gray-800" 
+                onClick={() => router.push("/questions/new")}
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Add Question
+              </Button>
+            </div>
+          </div>
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {filteredQuestions.map((question) => (
-              <Card key={question.id} className="hover:shadow-md transition-shadow">
-                <CardHeader className="pb-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
+          <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200">
+                  <TableHead className="font-bold text-gray-800 py-4 px-6">Question Text</TableHead>
+                  <TableHead className="font-bold text-gray-800 py-4 px-4 w-28">Type</TableHead>
+                  <TableHead className="font-bold text-gray-800 py-4 px-4 w-24">Score</TableHead>
+                  <TableHead className="font-bold text-gray-800 py-4 px-4 w-36">Group</TableHead>
+                  <TableHead className="font-bold text-gray-800 py-4 px-4 w-28 text-center">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredQuestions.map((question, index) => (
+                  <TableRow 
+                    key={question.id} 
+                    className={`border-b border-gray-100 hover:bg-gradient-to-r hover:from-blue-50/50 hover:to-indigo-50/50 transition-all duration-200 ${
+                      index % 2 === 0 ? "bg-white" : "bg-gray-50/30"
+                    }`}
+                  >
+                    <TableCell className="py-6 px-6">
+                      <div className="space-y-4">
+                        <p className="font-semibold text-gray-900 leading-relaxed text-base">
+                          {question.text}
+                        </p>
+                        
+                        {question.type === "MCQ" ? (
+                          <div className="space-y-2 pl-2">
+                            {question.choices.map((choice) => (
+                              <div
+                                key={choice.id}
+                                className={`flex items-center gap-3 p-3 rounded-lg text-sm transition-colors ${
+                                  question.correct === choice.index 
+                                    ? "bg-green-50 border border-green-200" 
+                                    : "bg-gray-50 border border-gray-150"
+                                }`}
+                              >
+                                <span className="font-bold text-gray-600 min-w-[24px] text-center">
+                                  {choice.index + 1}.
+                                </span>
+                                <span className="text-gray-800 flex-1 font-medium">{choice.text}</span>
+                                {question.correct === choice.index && (
+                                  <div className="flex items-center gap-1">
+                                    <CheckCircle className="w-4 h-4 text-green-600" />
+                                    <span className="text-xs font-semibold text-green-700">Correct</span>
+                                  </div>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <Alert className="border-blue-200 bg-gradient-to-r from-blue-50 to-indigo-50">
+                            <AlertDescription className="text-blue-800 text-sm font-medium">
+                              💭 Text answer required - manual grading needed
+                            </AlertDescription>
+                          </Alert>
+                        )}
+                      </div>
+                    </TableCell>
+                    
+                    <TableCell className="py-6 px-4">
                       {question.type === "MCQ" ? (
-                        <Badge className="bg-blue-600 text-white px-3 py-1 rounded-lg flex items-center gap-1">
+                        <Badge className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-3 py-2 rounded-lg flex items-center gap-2 w-fit shadow-sm">
                           <HelpCircle className="w-4 h-4" />
-                          MCQ
+                          <span className="font-semibold">MCQ</span>
                         </Badge>
                       ) : (
-                        <Badge className="bg-green-600 text-white px-3 py-1 rounded-lg">
-                          TEXT
+                        <Badge className="bg-gradient-to-r from-green-600 to-green-700 text-white px-3 py-2 rounded-lg w-fit shadow-sm">
+                          <span className="font-semibold">TEXT</span>
                         </Badge>
                       )}
-                      <span className="text-sm font-medium">{question.score} pts</span>
-                    </div>
-
-                    <div className="flex items-center gap-1">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-8 w-8 p-0 cursor-pointer"
-                        onClick={() => router.push(`/questions/${question.id}/edit`)}
-                      >
-                        <Edit className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-8 w-8 p-0 hover:bg-red-50 hover:text-red-600 cursor-pointer"
-                        onClick={() => openDeleteModal(question.id)}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </div>
-
-                  {/* Group Name */}
-                  <div className="mt-3">
-                    <span className="text-sm font-medium text-foreground">
-                      {question.group?.name}
-                    </span>
-                  </div>
-                </CardHeader>
-
-                <CardContent className="pt-0">
-                  <div className="mb-4">
-                    <p className="font-medium text-foreground">{question.text}</p>
-                  </div>
-
-                  {question.type === "MCQ" ? (
-                    <div className="space-y-2">
-                      {question.choices.map((choice) => (
-                        <div
-                          key={choice.id}
-                          className="flex items-center gap-3 p-3 bg-muted rounded-lg"
+                    </TableCell>
+                    
+                    <TableCell className="py-6 px-4">
+                      <div className="bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 w-fit">
+                        <span className="font-bold text-amber-800">{question.score}</span>
+                        <span className="text-amber-600 text-sm ml-1">pts</span>
+                      </div>
+                    </TableCell>
+                    
+                    <TableCell className="py-6 px-4">
+                      <div className="bg-purple-50 border border-purple-200 rounded-lg px-3 py-2 w-fit">
+                        <span className="text-sm font-semibold text-purple-800">
+                          {question.group?.name || "No Group"}
+                        </span>
+                      </div>
+                    </TableCell>
+                    
+                    <TableCell className="py-6 px-4">
+                      <div className="flex items-center justify-center gap-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-9 w-9 p-0 cursor-pointer hover:bg-blue-100 hover:text-blue-700 rounded-lg border border-transparent hover:border-blue-200 transition-all duration-200"
+                          onClick={() => router.push(`/questions/${question.id}/edit`)}
                         >
-                          <span className="font-medium text-muted-foreground min-w-[20px]">
-                            {choice.index + 1}
-                          </span>
-                          <span className="text-foreground flex-1">{choice.text}</span>
-                          {question.correct === choice.index && (
-                            <CheckCircle className="w-4 h-4 text-green-600" />
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <Alert className="border-blue-200 bg-blue-50">
-                      <AlertDescription className="text-blue-800">
-                        Text answer required - manual grading needed
-                      </AlertDescription>
-                    </Alert>
-                  )}
-                </CardContent>
-              </Card>
-            ))}
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-9 w-9 p-0 hover:bg-red-100 hover:text-red-700 rounded-lg border border-transparent hover:border-red-200 cursor-pointer transition-all duration-200"
+                          onClick={() => openDeleteModal(question.id)}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           </div>
         )}
 
