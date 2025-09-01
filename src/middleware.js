@@ -1,7 +1,4 @@
-// export { auth as middleware } from "@/auth";
-
-import NextAuth from "next-auth";
-import authConfig from "./auth.config";
+import { auth } from "@/auth";
 import {
   DEFAULT_LOGIN_REDIRECT,
   apiAuthPrefix,
@@ -9,32 +6,30 @@ import {
   publicRoutes,
 } from "@/routes";
 
-const { auth } = NextAuth(authConfig);
-
 export default auth((req) => {
   const { nextUrl } = req;
   const isLoggedIn = !!req.auth;
+  const role = req.auth?.user?.role;
+
+  console.log("🟢 Middleware Debug -> Full Auth:", req.auth);
+  console.log("🟢 Middleware Debug -> User Role:", role);
 
   const isApiAuthRoute = nextUrl.pathname.startsWith(apiAuthPrefix);
   const isPublicRoute = publicRoutes.includes(nextUrl.pathname);
   const isAuthRoute = authRoutes.includes(nextUrl.pathname);
 
   if (isApiAuthRoute) {
-    // Do nothing for API auth routes
     return;
   }
 
   if (isAuthRoute) {
     if (isLoggedIn) {
-      // Redirect logged-in users away from auth routes
       return Response.redirect(new URL(DEFAULT_LOGIN_REDIRECT, nextUrl));
     }
-    // Allow unauthenticated users to access auth routes
     return;
   }
 
   if (!isLoggedIn && !isPublicRoute) {
-    // Redirect unauthenticated users to the login page
     let callbackUrl = nextUrl.pathname;
     if (nextUrl.search) {
       callbackUrl += nextUrl.search;
@@ -47,11 +42,17 @@ export default auth((req) => {
     );
   }
 
-  // Allow access to public routes or logged-in users
+  // ✅ RBAC check
+  if (nextUrl.pathname.startsWith("/questions")) {
+    if (role !== "ADMIN") {
+      console.log("🔴 Access denied for role:", role);
+      return Response.redirect(new URL("/auth/unauthorized", nextUrl));
+    }
+  }
+
   return;
 });
 
-// Optionally, don't invoke Middleware on some paths
 export const config = {
   matcher: ["/((?!.+\\.[\\w]+$|_next).*)", "/", "/(api|trpc)(.*)"],
 };

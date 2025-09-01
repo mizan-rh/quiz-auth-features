@@ -1,14 +1,29 @@
 "use client";
 
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { ShieldAlert } from "lucide-react";
 import { logout } from "@/actions/auth/logout";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ShieldAlert } from "lucide-react";
+import { useEffect } from "react";
 
 export default function UnauthorizedPage() {
+  // Clean URL on page load to remove any callback parameters
+  useEffect(() => {
+    if (window.location.search) {
+      window.history.replaceState({}, '', '/auth/unauthorized');
+    }
+  }, []);
+
   const handleLoginAgain = async () => {
-    await logout(); // server action → clears session
-    window.location.href = "/auth/login"; // redirect after logout
+    try {
+      await logout();
+      // Force clean redirect - remove any query params
+      window.location.replace("/auth/login");
+    } catch (error) {
+      console.error("Logout error:", error);
+      // Fallback: direct redirect even if logout fails
+      window.location.replace("/auth/login");
+    }
   };
 
   return (
@@ -22,14 +37,11 @@ export default function UnauthorizedPage() {
         </CardHeader>
         <CardContent className="text-center space-y-4">
           <p className="text-gray-600">
-            You don’t have permission to access this page.  
+            You don't have permission to access this page.  
             Please contact an administrator if you think this is a mistake.
           </p>
 
           <div className="flex justify-center gap-3">
-            <Button asChild variant="outline">
-              <a href="/">Go Home</a>
-            </Button>
             <Button onClick={handleLoginAgain}>
               Login Again
             </Button>
