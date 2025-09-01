@@ -22,46 +22,34 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   },
   callbacks: {
     async signIn({ user, account }) {
-      // Allow OAuth without email verification
       if (account?.provider !== "credentials") return true;
 
-      if (!user.id) {
-        return false; // Reject sign-in if user ID is undefined
-      }
+      if (!user.id) return false;
 
       const existingUser = await getUserById(user.id);
-
-      // Prevent sign in without email verification
       if (!existingUser?.emailVerified) return false;
 
       return true;
     },
-    async session({ session, token }) {
-      if (token.sub && session.user) {
-        session.user.id = token.sub;
+    async jwt({ token, user }) {
+      // Add role to token when user logs in
+      if (user) {
+        const existingUser = await getUserById(user.id);
+        token.role = existingUser?.role || null; // <-- add role
+        token.name = existingUser?.name;
+        token.email = existingUser?.email;
       }
-
-      if (session.user) {
-        session.user.name = token.name;
-        session.user.email = token.email;
-      }
-
-      return session;
-    },
-    async jwt({ token }) {
-      if (!token.sub) return token;
-
-      const existingUser = await getUserById(token.sub);
-
-      if (!existingUser) return token;
-
-      const existingAccount = await getAccountByUserId(existingUser.id);
-
-      token.isOAuth = !!existingAccount;
-      token.name = existingUser.name;
-      token.email = existingUser.email;
 
       return token;
+    },
+    async session({ session, token }) {
+      if (session.user) {
+        session.user.id = token.sub;
+        session.user.name = token.name;
+        session.user.email = token.email;
+        session.user.role = token.role; // <-- add role to session
+      }
+      return session;
     },
   },
   adapter: PrismaAdapter(db),
