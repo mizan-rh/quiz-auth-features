@@ -1,6 +1,8 @@
 "use server";
-import { signOut } from "@/auth";
 
+// Simple logout without NextAuth signOut
 export const logout = async () => {
-  await signOut();
+  // Just return success - let client handle the redirect
+  // NextAuth session will be cleared on next request
+  return { success: true };
 };

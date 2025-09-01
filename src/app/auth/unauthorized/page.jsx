@@ -1,30 +1,30 @@
 "use client";
 
-import { logout } from "@/actions/auth/logout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ShieldAlert } from "lucide-react";
-import { useEffect } from "react";
+import { signOut } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 export default function UnauthorizedPage() {
-  // Clean URL on page load to remove any callback parameters
-  useEffect(() => {
-    if (window.location.search) {
-      window.history.replaceState({}, '', '/auth/unauthorized');
-    }
-  }, []);
+  const router = useRouter();
 
   const handleLoginAgain = async () => {
     try {
-      await logout();
-      // Force clean redirect - remove any query params
-      window.location.replace("/auth/login");
+      // Client-side signOut - no server action needed
+      await signOut({ 
+        redirect: false // Don't auto-redirect
+      });
+      // Clean navigation to login page
+      router.replace("/auth/login");
     } catch (error) {
       console.error("Logout error:", error);
-      // Fallback: direct redirect even if logout fails
-      window.location.replace("/auth/login");
+      // Navigate anyway if logout fails
+      router.replace("/auth/login");
     }
   };
+
+
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
@@ -38,11 +38,13 @@ export default function UnauthorizedPage() {
         <CardContent className="text-center space-y-4">
           <p className="text-gray-600">
             You don't have permission to access this page.  
-            Please contact an administrator if you think this is a mistake.
+            Please login as an admin.
           </p>
 
-          <div className="flex justify-center gap-3">
-            <Button onClick={handleLoginAgain}>
+          <div className="flex justify-center">
+            <Button 
+              onClick={handleLoginAgain}
+            >
               Login Again
             </Button>
           </div>
