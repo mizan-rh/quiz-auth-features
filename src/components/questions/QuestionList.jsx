@@ -70,7 +70,7 @@ export default function QuestionList({ questions, groups }) {
   }, [questions, selectedGroup, selectedType]);
 
   return (
-    <div className="min-h-screen bg-background p-6">
+    <div className="min-h-screen p-6">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="flex flex-col lg:flex-row justify-between items-start mb-8 gap-4">
@@ -136,14 +136,20 @@ export default function QuestionList({ questions, groups }) {
                     {/* Left: Type + Score */}
                     <div className="flex items-center gap-2">
                       {question.type === "MCQ" ? (
-                        <Badge className="bg-blue-600 text-white flex items-center gap-1 px-2 py-1">
+                        <div className="flex items-center space-x-2">
                           <HelpCircle className="w-4 h-4" />
+                        <Badge variant="default">
+                          
                           MCQ
                         </Badge>
+                        </div>
                       ) : (
-                        <Badge className="bg-green-600 text-white px-2 py-1">
+                        <div className="flex items-center space-x-2">
+                          <HelpCircle className="w-4 h-4" />
+                        <Badge variant="secondary">
                           TEXT
                         </Badge>
+                          </div>
                       )}
                       <Badge variant="outline">{question.score} pts</Badge>
                     </div>
