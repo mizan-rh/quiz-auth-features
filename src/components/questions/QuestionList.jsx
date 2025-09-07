@@ -137,19 +137,19 @@ export default function QuestionList({ questions, groups }) {
                     <div className="flex items-center gap-2">
                       {question.type === "MCQ" ? (
                         <div className="flex items-center space-x-2">
-                          <HelpCircle className="w-4 h-4" />
-                        <Badge variant="default">
-                          
-                          MCQ
-                        </Badge>
+                          <HelpCircle className="w-5 h-5" />
+                          <Badge variant="default">
+
+                            MCQ
+                          </Badge>
                         </div>
                       ) : (
                         <div className="flex items-center space-x-2">
-                          <HelpCircle className="w-4 h-4" />
-                        <Badge variant="secondary">
-                          TEXT
-                        </Badge>
-                          </div>
+                          <HelpCircle className="w-5 h-5" />
+                          <Badge variant="secondary">
+                            TEXT
+                          </Badge>
+                        </div>
                       )}
                       <Badge variant="outline">{question.score} pts</Badge>
                     </div>
@@ -169,7 +169,7 @@ export default function QuestionList({ questions, groups }) {
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="h-8 w-8 p-0 hover:bg-red-50 hover:text-red-600"
+                        className="h-8 w-8 p-0 text-red-600 hover:text-gray-900"
                         onClick={() => openDeleteModal(question.id)}
                       >
                         <Trash2 className="w-4 h-4" />
